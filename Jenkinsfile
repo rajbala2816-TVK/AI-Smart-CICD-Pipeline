@@ -20,7 +20,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 echo 'Running automated tests...'
-                bat '"C:\\Users\\Lenovo\\AppData\\Local\\Programs\\Python\\Python312\\python.exe" -m pytest
+                bat '"C:\\Users\\Lenovo\\AppData\\Local\\Programs\\Python\\Python312\\python.exe" -m pytest'
             }
         }
 
