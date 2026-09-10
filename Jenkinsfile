@@ -24,20 +24,29 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Docker Build') {
             steps {
-                echo 'Build stage completed successfully.'
+                echo 'Building Docker image...'
+                bat 'docker build -t ai-smart-cicd .'
+            }
+        }
+
+        stage('Docker Deploy') {
+            steps {
+                echo 'Deploying Docker container...'
+                bat 'docker rm -f ai-smart-cicd-container || exit 0'
+                bat 'docker run -d -p 5000:5000 --name ai-smart-cicd-container ai-smart-cicd'
             }
         }
     }
 
     post {
         success {
-            echo 'CI Pipeline completed successfully!'
+            echo 'CI/CD Pipeline completed successfully!'
         }
 
         failure {
-            echo 'CI Pipeline failed. AI Failure Analysis will be added next.'
+            echo 'CI/CD Pipeline failed. AI Failure Analysis will be added next.'
         }
     }
 }
