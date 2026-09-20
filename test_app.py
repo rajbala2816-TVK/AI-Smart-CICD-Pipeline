@@ -12,5 +12,3 @@ def test_health_check():
     response = client.get("/health")
     assert response.status_code == 200
     assert response.data == b"Application is healthy!"
-def test_ai_failure_demo():
-    assert 1 == 2
