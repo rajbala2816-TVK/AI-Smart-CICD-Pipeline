@@ -13,6 +13,7 @@ pipeline {
         stage('Install Dependencies') {
             steps {
                 echo 'Installing Python dependencies...'
+
                 bat '"C:\\Users\\Lenovo\\AppData\\Local\\Programs\\Python\\Python312\\python.exe" -m pip install -r requirements.txt'
             }
         }
@@ -38,7 +39,20 @@ pipeline {
         stage('Docker Build') {
             steps {
                 echo 'Building Docker image...'
-                bat '"C:\\Users\\Lenovo\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" build -t ai-smart-cicd .'
+
+                script {
+                    def dockerBuildResult = bat(
+                        script: '"C:\\Users\\Lenovo\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" build -t ai-smart-cicd . > docker_build.log 2>&1',
+                        returnStatus: true
+                    )
+
+                    bat 'type docker_build.log >> jenkins_error.log'
+
+                    if (dockerBuildResult != 0) {
+                        echo 'Docker build failed. AI Failure Analysis will be triggered.'
+                        error('Docker build failed.')
+                    }
+                }
             }
         }
 
@@ -48,7 +62,19 @@ pipeline {
 
                 bat '"C:\\Users\\Lenovo\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" rm -f ai-smart-cicd-container || exit 0'
 
-                bat '"C:\\Users\\Lenovo\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" run -d -p 5000:5000 --name ai-smart-cicd-container ai-smart-cicd'
+                script {
+                    def dockerDeployResult = bat(
+                        script: '"C:\\Users\\Lenovo\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin\\docker.exe" run -d -p 5000:5000 --name ai-smart-cicd-container ai-smart-cicd > docker_deploy.log 2>&1',
+                        returnStatus: true
+                    )
+
+                    bat 'type docker_deploy.log >> jenkins_error.log'
+
+                    if (dockerDeployResult != 0) {
+                        echo 'Docker deployment failed. AI Failure Analysis will be triggered.'
+                        error('Docker deployment failed.')
+                    }
+                }
             }
         }
     }
